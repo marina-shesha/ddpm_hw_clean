@@ -253,7 +253,7 @@ class DiffusionRunner:
             N = self.sde.N  
             T = self.sde.T
             pred_images = self.sde.prior_sampling(shape).to(device)
-            labels = labels.to(device)
+            # labels = labels.to(device)
             for t in range(N-1, -1, -1):
                 T = torch.ones(shape[0], device = device) * t/N * T
                 pred_images, mean = self.diff_eq_solver.step(pred_images, T, labels)
