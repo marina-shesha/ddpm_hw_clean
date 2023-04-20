@@ -121,7 +121,7 @@ class EulerDiffEqSolver:
         x = x_mean + noise (yet another noise sampling)
         """
         drift, diffusion = self.rsde.sde(x, t, y)
-        dt = self.sde.T/self.sde.N * torch.ones(x.shape[0])
+        dt = self.sde.T/self.sde.N
         x_mean = x + drift * dt
-        x = x_mean + diffusion *  torch.randn_like(x)*torch.sqrt(dt)
+        x = x_mean + diffusion *  torch.randn_like(x)*np.sqrt(dt)
         return x, x_mean
