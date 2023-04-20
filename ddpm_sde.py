@@ -92,10 +92,10 @@ class DDPM_SDE:
                     score = score_fn(x, t, y)
                 drift, diffusion = sde_fn(x, t)
                 if self.ode_sampling == True:
-                    drift = -drift - diffusion ** 2 * score
+                    drift = drift - diffusion ** 2 * score
                     diffusion = diffusion
                 else :
-                    drift = -drift - diffusion ** 2 * score / 2
+                    drift = drift - diffusion ** 2 * score / 2
                     diffusion = 0
                     
                 return drift, diffusion
@@ -121,7 +121,7 @@ class EulerDiffEqSolver:
         x = x_mean + noise (yet another noise sampling)
         """
         drift, diffusion = self.rsde.sde(x, t, y)
-        dt = self.sde.T/self.sde.N
+        dt = -self.sde.T/self.sde.N
         x_mean = x + drift * dt
         x = x_mean + diffusion *  torch.randn_like(x)*np.sqrt(dt)
         return x, x_mean

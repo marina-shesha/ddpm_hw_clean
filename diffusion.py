@@ -228,7 +228,7 @@ class DiffusionRunner:
             """
             calculate likelihood_score with torch.autograd.grad
             """
-            likelihood_score = grad(outputs = self.classifier, inputs = (y, t))
+            likelihood_score = grad(outputs = self.classifier(y,t), inputs = x)
             return likelihood_score
 
         self.set_conditional_sampling(classifier_grad_fn, T=T)
