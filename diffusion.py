@@ -255,8 +255,8 @@ class DiffusionRunner:
             pred_images = self.sde.prior_sampling(shape).to(device)
             # labels = labels.to(device)
             for t in range(N, 0, -1):
-                T = torch.ones(shape[0], device = device) * t/N * T
-                pred_images, mean = self.diff_eq_solver.step(pred_images, T, labels)
+                time = torch.ones(shape[0], device = device) * t/N * T
+                pred_images, mean = self.diff_eq_solver.step(pred_images, time, labels)
                                     
                                     
         return self.inverse_scaler(pred_images)
