@@ -212,7 +212,7 @@ class DiffusionRunner:
             """
             define posterior_score w.r.t T
             """
-            posterior_score_T = self.calc_score(x, t, y) + classifier_grad_fn(x, t, y)
+            posterior_score_T =  self.calc_score(x, t, y) + classifier_grad_fn(x, t, y)/T
             return posterior_score_T
         
         self.diff_eq_solver = EulerDiffEqSolver(
@@ -228,7 +228,7 @@ class DiffusionRunner:
             """
             calculate likelihood_score with torch.autograd.grad
             """
-            likelihood_score = grad(outputs = self.classifier(y,t), inputs = x)
+            likelihood_score = grad(outputs = self.classifier(x,t)[y], inputs = x)
             return likelihood_score
 
         self.set_conditional_sampling(classifier_grad_fn, T=T)
@@ -296,7 +296,14 @@ class DiffusionRunner:
             t = self.sample_time(X.size(0)).to(device)
 
             """calc logits"""
-            
+            X = X.to(self.device)
+            y = y.to(self.device)
+            mean, std = self.sde.marginal_prob(X, t)
+            noise = torch.randn_like(X)
+            input_x = noise * std + mean
+            logits = classifier(input_x, t)
+            pred_labels = torch.argmax(logits, dim=-1)
+            loss = classifier_loss(y, logits)
             return loss, pred_labels
 
         self.set_data_generator()
@@ -313,6 +320,12 @@ class DiffusionRunner:
             """
             train classifier
             """
+            X, y = next(train_generator)
+            loss, pred_labels = get_logits(X, y)
+
+            loss.backward()
+            classifier_optim.step()
+            classifier_optim.zero_grad()
 
             if iter_idx % self.config.classifier.snapshot_freq == 0:
                 self.snapshot(labels=labels)
@@ -326,6 +339,12 @@ class DiffusionRunner:
                     """
                     validate classifier
                     """
+                    for X,y in self.datagen.valid_loader:
+                        valid_count += X.shape[0]
+                        loss, pred_labels = get_logits(X, y)
+                        valid_loss += loss * X.shape[0]
+                        valid_accuracy += (pred_labels == y).sum()
+
                 valid_loss = valid_loss / valid_count
                 valid_accuracy = valid_accuracy / valid_count
                 self.log_metric('cross_entropy', 'valid', valid_loss)
