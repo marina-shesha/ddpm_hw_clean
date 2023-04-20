@@ -81,7 +81,7 @@ class DiffusionRunner:
         """
         calculate score w.r.t noisy X and t
         """
-        score = self.model(input_x, input_t)/self.sde.marginal_std(input_t)
+        score = -self.model(input_x, input_t)/self.sde.marginal_std(input_t)
         return score
 
     def sample_time(self, batch_size: int, eps: float = 1e-5):
@@ -254,7 +254,7 @@ class DiffusionRunner:
             T = self.sde.T
             pred_images = self.sde.prior_sampling(shape).to(device)
             # labels = labels.to(device)
-            for t in range(N-1, -1, -1):
+            for t in range(N, 0, -1):
                 T = torch.ones(shape[0], device = device) * t/N * T
                 pred_images, mean = self.diff_eq_solver.step(pred_images, T, labels)
                                     
