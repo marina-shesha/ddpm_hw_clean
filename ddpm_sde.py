@@ -44,7 +44,7 @@ class DDPM_SDE:
         """
         integ =  (self.beta_1-self.beta_0) * (t**2/2) + self.beta_0 * t
         integ = integ.unsqueeze(1).unsqueeze(1).unsqueeze(1)
-        std = torch.sqrt(1-np.exp(-integ))
+        std = torch.sqrt(1-torch.exp(-integ))
         return std
 
     def prior_sampling(self, shape):
