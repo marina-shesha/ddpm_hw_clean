@@ -24,6 +24,7 @@ class DDPM_SDE:
         Calculate drift coeff. and diffusion coeff. in forward SDE
         """
         beta = (self.beta_1-self.beta_0) * t + self.beta_0
+        beta = beta.unsqueeze(1).unsqueeze(1).unsqueeze(1)
         drift = -0.5*beta * x
         diffusion = torch.sqrt(beta)
         return drift, diffusion
