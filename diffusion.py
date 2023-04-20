@@ -96,7 +96,7 @@ class DiffusionRunner:
         noise = torch.randn_like(clean_x)
         input_x = noise*std + mean
         pred_noise = self.model(input_x, input_t)
-        loss = torch.nn.MSELoss(noise, pred_noise)
+        loss = torch.nn.MSELoss()(noise, pred_noise)
         return loss
 
     def set_data_generator(self) -> None:
