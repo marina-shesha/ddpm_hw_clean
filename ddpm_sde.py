@@ -33,6 +33,7 @@ class DDPM_SDE:
         Calculate marginal q(x_t|x_0)'s mean and std
         """
         integ =  (self.beta_1-self.beta_0) * (t**2/2) + self.beta_0 * t
+        integ = integ.unsqueeze(1).unsqueeze(1).unsqueeze(1)
         mean = x_0 * torch.exp(-0.5 * integ)
         std = torch.sqrt(1-torch.exp(-integ))
         return mean, std
@@ -41,7 +42,8 @@ class DDPM_SDE:
         """
         Calculate marginal q(x_t|x_0)'s std
         """
-        integ =  (self.beta_1-self.beta_0) * (t^2/(2*(self.N + 1))) + self.beta_0 * t
+        integ =  (self.beta_1-self.beta_0) * (t**2/2) + self.beta_0 * t
+        integ = integ.unsqueeze(1).unsqueeze(1).unsqueeze(1)
         std = torch.sqrt(1-np.exp(-integ))
         return std
 
