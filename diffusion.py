@@ -250,9 +250,6 @@ class DiffusionRunner:
             self.config.data.image_size
         )
         device = torch.device(self.config.device)
-        self.model.eval()
-        if labels is not None:
-            self.classifier.eval()
         with torch.no_grad():
             """
             Implement cycle for Euler RSDE sampling w.r.t labels 
