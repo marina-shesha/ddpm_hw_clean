@@ -327,7 +327,7 @@ class DiffusionRunner:
             """
             X, y = next(train_generator)
             loss, pred_labels = get_logits(X, y)
-            accuracy = (pred_labels == y).sum()
+            accuracy = (pred_labels == y.to(device)).sum()
             self.log_metric('loss', 'train', loss.item())
             self.log_metric('accuracy', 'train', accuracy)
             loss.backward()
@@ -351,7 +351,7 @@ class DiffusionRunner:
                         valid_count += X.shape[0]
                         loss, pred_labels = get_logits(X, y)
                         valid_loss += loss * X.shape[0]
-                        valid_accuracy += (pred_labels == y).sum()
+                        valid_accuracy += (pred_labels == y.to(device)).sum()
 
                 valid_loss = valid_loss / valid_count
                 valid_accuracy = valid_accuracy / valid_count
