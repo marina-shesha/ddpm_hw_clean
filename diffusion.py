@@ -235,7 +235,7 @@ class DiffusionRunner:
             coord = torch.cat((b, y), dim=0).view(y.shape[0], -1)
             out = self.classifier(x,t)[coord[0], coord[1]]
             likelihood_score = grad(outputs = out.sum(), inputs = x)
-            return likelihood_score
+            return likelihood_score[0]
 
         self.set_conditional_sampling(classifier_grad_fn, T=T)
 
