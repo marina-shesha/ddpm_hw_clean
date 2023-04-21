@@ -230,10 +230,10 @@ class DiffusionRunner:
             """
             calculate likelihood_score with torch.autograd.grad
             """
+            x.require_grad = True
             b = torch.tensor(np.arange(y.shape[0])).to(y.device)
             coord = torch.cat((b, y), dim=0).view(y.shape[0], -1)
             out = self.classifier(x,t)[coord[0], coord[1]]
-            x.require_grad = True
             likelihood_score = grad(outputs = out.sum(), inputs = x)
             return likelihood_score
 
