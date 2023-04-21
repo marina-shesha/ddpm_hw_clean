@@ -224,11 +224,16 @@ class DiffusionRunner:
 
     def set_classifier(self, classifier: torch.nn.Module, T: float = 1.0) -> None:
         self.classifier = classifier
+
+        @torch.enable_grad()
         def classifier_grad_fn(x, t, y):
             """
             calculate likelihood_score with torch.autograd.grad
             """
-            likelihood_score = grad(outputs = self.classifier(x,t)[y], inputs = x)
+            b = torch.tensor(np.arange(y.shape[0]))
+            coord = torch.cat((b, y), dim=0).view(y.shape[0], -1)
+            out = self.classifier(x,t)[coord[0], coord[1]]
+            likelihood_score = grad(outputs = out.sum(), inputs = x)
             return likelihood_score
 
         self.set_conditional_sampling(classifier_grad_fn, T=T)
@@ -303,7 +308,7 @@ class DiffusionRunner:
             input_x = noise * std + mean
             logits = classifier(input_x, t)
             pred_labels = torch.argmax(logits, dim=-1)
-            loss = classifier_loss(y, logits)
+            loss = classifier_loss(logits, y)
             return loss, pred_labels
 
         self.set_data_generator()
