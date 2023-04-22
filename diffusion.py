@@ -205,14 +205,14 @@ class DiffusionRunner:
 
     def set_conditional_sampling(
             self,
-            classifier_grad_fn: Callable[["NoisyImages", "T", "Labels"], "Scores"],
+            classifier_grad_fn: Callable[["NoisyImages", "T", "Labels", "temperature"], "Scores"],
             T: float = 1.0
     ) -> None:
         def new_score_fn(x, t, y):
             """
             define posterior_score w.r.t T
             """
-            posterior_score_T =  self.calc_score(x, t, y) + classifier_grad_fn(x, t, y)/T
+            posterior_score_T =  self.calc_score(x, t, y) + classifier_grad_fn(x, t, y, T)
             return posterior_score_T
         
         self.diff_eq_solver = EulerDiffEqSolver(
@@ -226,13 +226,13 @@ class DiffusionRunner:
         self.classifier = classifier
 
         @torch.enable_grad()
-        def classifier_grad_fn(x, t, y):
+        def classifier_grad_fn(x, t, y, T):
             """
             calculate likelihood_score with torch.autograd.grad
             """
             x.requires_grad = True
             b = torch.tensor(np.arange(y.shape[0])).to(y.device)
-            out = torch.nn.LogSoftmax(dim = -1)(self.classifier(x,t))[b, y]
+            out = torch.nn.LogSoftmax(dim = -1)(self.classifier(x,t)/T)[b, y]
             likelihood_score = grad(outputs = out.sum(), inputs = x)
             x.requires_grad = False
             return likelihood_score[0]
