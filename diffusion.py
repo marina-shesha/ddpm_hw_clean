@@ -326,6 +326,7 @@ class DiffusionRunner:
             train classifier
             """
             X, y = next(train_generator)
+            classifier_optim.zero_grad()
             loss, pred_labels = get_logits(X, y)
             accuracy = (pred_labels == y.to(device)).sum()
             self.log_metric('loss', 'train', loss.item())
@@ -333,7 +334,6 @@ class DiffusionRunner:
             loss.backward()
 
             classifier_optim.step()
-            classifier_optim.zero_grad()
 
             if iter_idx % self.config.classifier.snapshot_freq == 0:
                 self.snapshot(labels=labels)
