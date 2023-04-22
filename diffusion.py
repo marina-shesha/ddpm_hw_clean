@@ -232,8 +232,9 @@ class DiffusionRunner:
             """
             x.requires_grad = True
             b = torch.tensor(np.arange(y.shape[0])).to(y.device)
-            out = self.classifier(x,t)[b, y]
+            out = torch.nn.LogSoftmax(self.classifier(x,t), dim = -1)[b, y]
             likelihood_score = grad(outputs = out.sum(), inputs = x)
+            x.requires_grad = False
             return likelihood_score[0]
 
         self.set_conditional_sampling(classifier_grad_fn, T=T)
@@ -268,9 +269,12 @@ class DiffusionRunner:
 
     def snapshot(self, labels: Optional[torch.Tensor] = None) -> None:
         prev_mode = self.model.training
+        prev_mode_cls = self.classifier.training
 
         self.model.eval()
         self.switch_to_ema()
+
+        self.classifier.eval()
 
         images = self.sample_images(self.config.training.snapshot_batch_size, labels=labels).cpu()
         nrow = int(math.sqrt(self.config.training.snapshot_batch_size))
@@ -280,6 +284,7 @@ class DiffusionRunner:
 
         self.switch_back_from_ema()
         self.model.train(prev_mode)
+        self.classifier.train(prev_mode_cls)
 
     def train_classifier(
             self,
