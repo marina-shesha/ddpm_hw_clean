@@ -232,7 +232,7 @@ class DiffusionRunner:
             """
             x.requires_grad = True
             b = torch.tensor(np.arange(y.shape[0])).to(y.device)
-            out = torch.nn.LogSoftmax(self.classifier(x,t), dim = -1)[b, y]
+            out = torch.nn.LogSoftmax(dim = -1)(self.classifier(x,t))[b, y]
             likelihood_score = grad(outputs = out.sum(), inputs = x)
             x.requires_grad = False
             return likelihood_score[0]
