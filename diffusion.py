@@ -212,7 +212,7 @@ class DiffusionRunner:
             """
             define posterior_score w.r.t T
             """
-            posterior_score_T =  self.calc_score(x, t, y) + F.log_softmax(classifier_grad_fn(x, t, y)/T)
+            posterior_score_T =  self.calc_score(x, t, y) + classifier_grad_fn(x, t, y)/T
             return posterior_score_T
         
         self.diff_eq_solver = EulerDiffEqSolver(
