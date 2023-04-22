@@ -268,9 +268,6 @@ class DiffusionRunner:
 
     def snapshot(self, labels: Optional[torch.Tensor] = None) -> None:
         prev_mode = self.model.training
-        prev_mode_cls = self.classifier.training
-
-        self.classifier.eval()
 
         self.model.eval()
         self.switch_to_ema()
@@ -283,7 +280,6 @@ class DiffusionRunner:
 
         self.switch_back_from_ema()
         self.model.train(prev_mode)
-        self.classifier.train(prev_mode_cls)
 
     def train_classifier(
             self,
